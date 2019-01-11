@@ -18,7 +18,10 @@
 # -- McAfee ePO user with permitions to manage tags
 # -- Create tags before run the script.
 # 
-# v1.0.2
+# * V1 Start 
+# * V2 Some changes
+# * V3 Check if/else and change run to 2 days. -11 Jan 2019 
+#
 
 #
 # Setting Variables
@@ -30,23 +33,28 @@ $compName = $env:computername
 $mcagent = "C:\Program Files\McAfee\Agent\maconfig.exe"
 $ScriptRegPath = "HKLM:\SOFTWARE\ePOpswhScript"
 $ScriptRUNdate = get-date -Format yyyy-MM-dd
-$ScriptVer = "1.0.2"
+$ScriptVer = "3"
 
 
 #
-# Check for Powershell_ePOSecurityTags and run after 3 days
+# Check for Powershell_ePOSecurityTags and run after "2" days especified in .AddDays(2)
 #
 If (!(Test-Path -Path $ScriptRegPath)) {
 	New-Item -Path $ScriptRegPath -Force
 	New-ItemProperty -Path $ScriptRegPath -Name ScriptVer -Value $ScriptVer -Force
 	New-ItemProperty -Path $ScriptRegPath -Name ScriptLASTrun -Value $ScriptRUNdate -Force
- else {
+} else {
 	$GetScriptVer = Get-ItemProperty -Path $ScriptRegPath -Name ScriptVer 
 	$GetScriptRUNdate = Get-ItemProperty -Path $ScriptRegPath -Name ScriptLASTrun
 	$GetScriptRUNdate = Get-Date $GetScriptRUNdate.ScriptLASTrun
-	$GetScriptnextRUNdate = $GetScriptRUNdate.AddDays(3)
-		If ($GetScriptRUNdate -lt $GetScriptnextRUNdate) {
+	$GetDate = Get-Date
+	$GetScriptnextRUNdate = $GetScriptRUNdate.AddDays(2)
+		If ($GetDate -lt $GetScriptnextRUNdate) {
 			stop-process -Id $PID
+		} else {
+			$GetDate = get-date -Format yyyy-MM-dd
+			New-ItemProperty -Path $ScriptRegPath -Name ScriptLASTrun -Value $GetDate -Force
+			New-ItemProperty -Path $ScriptRegPath -Name ScriptVer -Value $ScriptVer -Force
 		}
 }
 add-type @"
